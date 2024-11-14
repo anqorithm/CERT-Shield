@@ -135,7 +135,6 @@ def search_alerts(query: str, base_url):
 
 
 def process_pages(from_page: int, to_page: int, base_url: str):
-    collection = get_collection(base_url)
     all_alerts = []
     for i in range(from_page, to_page + 1):
         data = scrape_page(i, base_url)

@@ -11,10 +11,25 @@ def fetch_all_alerts(language: str):
 
 
 def scrape_and_store_alerts(from_page: int, to_page: int):
-    for page in range(from_page, to_page + 1):
-        alerts = scrape_page(page)
-        store_alerts_in_db(alerts)
-    return {"status": "success", "message": f"Scraped pages {from_page} to {to_page}"}
+    try:
+        successful_pages = 0
+        failed_pages = []
+
+        for page in range(from_page, to_page + 1):
+            try:
+                alerts = scrape_page(page)
+                store_alerts_in_db(alerts)
+                successful_pages += 1
+            except Exception as e:
+                failed_pages.append({"page": page, "error": str(e)})
+
+        message = f"Successfully scraped {successful_pages} pages"
+        if failed_pages:
+            message += f". Failed pages: {failed_pages}"
+
+        return {"status": "success", "message": message}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 def search_alerts_by_query(query: str):

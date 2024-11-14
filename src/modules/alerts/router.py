@@ -1,4 +1,4 @@
-from fastapi import APIRouter, BackgroundTasks, Query
+from fastapi import APIRouter, Query
 from src.modules.alerts.controller import (
     fetch_all_alerts,
     scrape_and_store_alerts,
@@ -9,16 +9,19 @@ router = APIRouter()
 
 
 @router.get("/")
-def get_alerts(language: str = Query(None)):
+def get_alerts(
+    language: str = Query("en", description="Language for alerts", enum=["en", "ar"])
+):
     return fetch_all_alerts(language)
 
 
 @router.post("/scrape")
 def scrape_alerts(
-    background_tasks: BackgroundTasks, from_page: int = 1, to_page: int = 1
+    from_: int = Query(1, alias="from", ge=1, description="Starting page number"),
+    to: int = Query(1, ge=1, description="Ending page number"),
 ):
-    background_tasks.add_task(scrape_and_store_alerts, from_page, to_page)
-    return {"status": "success", "message": "Scraping started in background"}
+    scrape_and_store_alerts(from_, to)
+    return {"status": "success", "message": "Scraping completed"}
 
 
 @router.get("/search")
